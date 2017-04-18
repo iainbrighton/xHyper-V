@@ -1,10 +1,14 @@
-configuration MSFT_xVMHost_Set_Config {
-    param (
-        [Parameter(Mandatory)]
-        [System.String] $VirtualHardDiskPath,
-        
-        [Parameter(Mandatory)]
-        [System.String] $VirtualMachinePath
+configuration MSFT_xVMHost_Set_Config 
+{
+    param
+    (
+        [Parameter(Mandatory  = $true)]
+        [System.String]
+        $VirtualHardDiskPath,
+
+        [Parameter(Mandatory = $true)]
+        [System.String]
+        $VirtualMachinePath
     )
 
     Import-DscResource -ModuleName xHyper-V

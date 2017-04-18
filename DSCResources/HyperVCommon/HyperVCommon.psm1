@@ -327,12 +327,11 @@ function ConvertFrom-TimeSpan
     [OutputType([System.Int32])]
     param
     (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory = $true)]
         [System.TimeSpan]
         $TimeSpan,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Seconds','Minutes','Hours','Days')]
         [System.String]
         $TimeSpanType
@@ -347,7 +346,6 @@ function ConvertFrom-TimeSpan
     }
 
 } #end function ConvertFrom-TimeSpan
-
 
 <#
     .SYNOPSIS
@@ -365,18 +363,17 @@ function ConvertTo-TimeSpan
     [OutputType([System.TimeSpan])]
     param
     (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory = $true)]
         [System.UInt32]
         $TimeInterval,
 
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory = $true)]
         [ValidateSet('Seconds','Minutes','Hours','Days')]
         [System.String]
         $TimeIntervalType
     )
 
-    $newTimeSpanParams = @{ };
+    $newTimeSpanParams = @{ }
     switch ($TimeIntervalType)
     {
         'Seconds' { $newTimeSpanParams['Seconds'] = $TimeInterval }
@@ -387,7 +384,6 @@ function ConvertTo-TimeSpan
     return (New-TimeSpan @newTimeSpanParams)
 
 } #end function ConvertTo-TimeSpan
-
 
 <#
     .SYNOPSIS
