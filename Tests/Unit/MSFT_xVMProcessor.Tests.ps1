@@ -13,7 +13,6 @@ if ( (-not (Test-Path -Path (Join-Path -Path $script:moduleRoot -ChildPath 'DSCR
 
 Import-Module -Name (Join-Path -Path $script:moduleRoot -ChildPath (Join-Path -Path 'DSCResource.Tests' -ChildPath 'TestHelper.psm1')) -Force
 
-# TODO: Insert the correct <ModuleName> and <ResourceName> for your resource
 $TestEnvironment = Initialize-TestEnvironment `
     -DSCModuleName $script:DSCModuleName `
     -DSCResourceName $script:DSCResourceName `
@@ -22,13 +21,11 @@ $TestEnvironment = Initialize-TestEnvironment `
 #endregion HEADER
 
 function Invoke-TestSetup {
-    # TODO: Optional init code goes here...
+
 }
 
 function Invoke-TestCleanup {
     Restore-TestEnvironment -TestEnvironment $TestEnvironment
-
-    # TODO: Other Optional Cleanup Code Goes Here...
 }
 
 # Begin Testing
@@ -47,12 +44,15 @@ try
                 EnableHostResourceProtection = $true
             }
 
-            ## Guard mocks
+            # Guard mocks
             Mock Assert-Module { }
 
             function Get-VMProcessor {
-                param (
-                    [System.String] $VMName
+                [CmdletBinding()]
+                param
+                (
+                    [System.String]
+                    $VMName
                 )
             }
 
@@ -75,33 +75,35 @@ try
 
             It 'Should throw when VM processor is not found' {
                 Mock Get-Module { return $true }
-                Mock Get-VMProcessor { }
-                { $result = Get-TargetResource -VMName $testVMName } | Should Throw 'not found'
+                Mock Get-VMProcessor { Write-Error 'Not Found' }
+                { $result = Get-TargetResource -VMName $testVMName } | Should Throw 'Not Found'
             }
-
         } # descrive Get-TargetResource
 
         Describe 'MSFT_xVMProcessor\Test-TargetResource' {
 
-            ## Guard mocks
+            # Guard mocks
             Mock Assert-Module { }
             Mock Assert-TargetResourceParameter { }
 
             function Get-VM {
                 param (
-                    [System.String] $Name
+                    [System.String]
+                    $Name
                 )
             }
 
             function Get-VMProcessor {
                 param (
-                    [System.String] $VMName
+                    [System.String]
+                    $VMName
                 )
             }
 
             function Set-VMProcessor {
                 param (
-                    [System.String] $VMName
+                    [System.String]
+                    $VMName
                 )
             }
 
@@ -158,69 +160,74 @@ try
                 'CompatibilityForOlderOperatingSystemsEnabled'
             )
 
-            ## Test each individual parameter value separately
+            # Test each individual parameter value separately
             foreach ($parameterName in $parameterNames)
             {
-                $parameterValue = $fakeTargetResource[$parameterName];
+                $parameterValue = $fakeTargetResource[$parameterName]
                 $testTargetResourceParams = @{
                     VMName = $testVMName
                 }
 
-                ## Pass value verbatim so it should always pass first
+                # Pass value verbatim so it should always pass first
                 It "Should pass when parameter '$parameterName' is correct" {
                     $testTargetResourceParams[$parameterName] = $parameterValue
 
-                    $result = Test-TargetResource @testTargetResourceParams;
+                    $result = Test-TargetResource @testTargetResourceParams
 
-                    $result | Should Be $true;
+                    $result | Should Be $true
                 }
 
-                if ($parameterValue -is [System.Boolean]) {
-
-                    ## Invert parameter value to cause a test failure
+                if ($parameterValue -is [System.Boolean])
+                {
+                    # Invert parameter value to cause a test failure
                     $testTargetResourceParams[$parameterName] = -not $parameterValue
                 }
-                elseif ($parameterValue -is [System.String]) {
-
-                    ## Repeat string to cause a test failure
+                elseif ($parameterValue -is [System.String])
+                {
+                    # Repeat string to cause a test failure
                     $testTargetResourceParams[$parameterName] = "$parameterValue$parameterValue"
                 }
-                elseif ($parameterValue -is [System.Int32] -or $parameterValue -is [System.Int64]) {
-
-                    ## Add one to cause a test failure
+                elseif ($parameterValue -is [System.Int32] -or $parameterValue -is [System.Int64])
+                {
+                    # Add one to cause a test failure
                     $testTargetResourceParams[$parameterName] = $parameterValue + 1
                 }
 
                 It "Should fail when parameter '$parameterName' is incorrect" {
-                    $result = Test-TargetResource @testTargetResourceParams;
+                    $result = Test-TargetResource @testTargetResourceParams
 
-                    $result | Should Be $false;
+                    $result | Should Be $false
                 }
             }
-
         } # describe Test-TargetResource
 
         Describe 'MSFT_xVMProcessor\Set-TargetResource' {
 
             function Get-VM {
-                param (
-                    [System.String] $Name
+                param
+                (
+                    [System.String]
+                    $Name
                 )
             }
 
             function Get-VMProcessor {
-                param (
-                    [System.String] $VMName
+                param
+                (
+                    [System.String]
+                    $VMName
                 )
             }
 
-            function set-VMProcessor {
-                param (
-                    [System.String] $VMName
+            function Set-VMProcessor {
+                param
+                (
+                    [System.String]
+                    $VMName
                 )
             }
 
-            ## Guard mocks
+            # Guard mocks
             Mock Assert-Module { }
             Mock Assert-TargetResourceParameter { }
             Mock Get-VM { }
@@ -248,8 +255,9 @@ try
                 'MaximumCountPerNumaSocket' = 2
                 'ResourcePoolName' = $testResourcePoolName;
             }
-            foreach ($parameter in $restartRequiredParameters.GetEnumerator()) {
 
+            foreach ($parameter in $restartRequiredParameters.GetEnumerator())
+            {
                 $setTargetResourceParams = @{
                     VMName = $testVMName;
                     $parameter.Name = $parameter.Value;
@@ -282,8 +290,9 @@ try
                 'RelativeWeight' = 50;
                 'Reserve' = 50;
             }
-            foreach ($parameter in $noRestartRequiredParameters.GetEnumerator()) {
 
+            foreach ($parameter in $noRestartRequiredParameters.GetEnumerator())
+            {
                 $setTargetResourceParams = @{
                     VMName = $testVMName;
                     $parameter.Name = $parameter.Value;
@@ -298,16 +307,14 @@ try
                     Assert-MockCalled Set-VMProperty -Scope It -Exactly 0
                 }
             }
-
         } # describe Set-TargetResource
 
         Describe 'MSFT_xVMProcessor\Assert-TargetResourceParameter' {
 
-            ## Return Windows Server 2012 R2/Windows 8.1 Update 1
+            # Return Windows Server 2012 R2/Windows 8.1 Update 1
             Mock Get-CimInstance { return @{ BuildNumber = '9600' } }
 
             It "Should not throw when parameter 'ResourcePoolName' is specified on 2012 R2 host" {
-
                 { Assert-TargetResourceParameter -ResourcePoolName 'TestPool' } | Should Not Throw
             }
 
@@ -317,21 +324,18 @@ try
                 HwThreadCountPerCore = 1;
             }
 
-            foreach ($parameter in $server2016OnlyParameters.GetEnumerator()) {
-
+            foreach ($parameter in $server2016OnlyParameters.GetEnumerator())
+            {
                 $assertTargetResourceParameterParams = @{
                     $parameter.Name = $parameter.Value;
                 }
 
                 It "Should throw when parameter '$($parameter.Name)' is specified on 2012 R2 host" {
-
                     { Assert-TargetResourceParameter @assertTargetResourceParameterParams } | Should Throw '14393'
                 }
-
             }
-
         } # describe Assert-TargetResourceParameter
-    }
+    } # InModuleScope
 }
 finally
 {
