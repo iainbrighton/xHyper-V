@@ -22,6 +22,8 @@ Please check out common DSC Resources [contributing guidelines](https://github.c
 * **xVMDvdDrive** manages DVD drives attached to a Hyper-V virtual machine.
 * **xVMHost** manages Hyper-V host settings.
 * **xVMProcessor** manages Hyper-V virtual machine processor options.
+* **xVMHardDiskDrive** manages VHD(X)s attached to a Hyper-V virtual machine.
+* **xVMScsiController** manages the SCSI controllers attached to a Hyper-V virtual machine.
 
 ### xVhd
 
@@ -75,7 +77,6 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 
 * **VhdPath**: Path to the VHD
 * **FileDirectory**: The FileDirectory objects to copy to the VHD (as used in the "File" resource).
-  Please see the Examples section for more details.
 
 ### xVMDvdDrive
 
@@ -130,6 +131,27 @@ The following xVMHyper-V properties **cannot** be changed after VM creation:
 * **`[String]` VirtualMachineMigrationPerformanceOption** (_Write_): Specifies the performance option to use for live migration. { TCPIP | Compression | SMB }.
 * **`[String]` VirtualMachinePath** (_Write_): Specifies the default folder to store virtual machine configuration files on the Hyper-V host.
 
+### xVMHardDiskDrive
+
+* **`[String]` VMName** (_Key_): Specifies the name of the virtual machine whose hard disk drive is to be manipulated.
+* **`[String]` VhdPath** (_Key_): Specifies the full path of the VHD file to be manipulated.
+* **`[String]` ControllerType** (_Write_): Specifies the type of controller to which the the hard disk drive is to be set: { IDE | *SCSI* }. Defaults to SCSI.
+* **`[Uint32]` ControllerNumber** (_Write_): Specifies the number of the controller to which the hard disk drive is to be set. For IDE: { 0, 1 }, for SCSI: { 0 | 1 | 2 | 3 }. Defaults to 0.
+* **`[Uint32]` ControllerLocation** (_Write_): Specifies the number of the location on the controller at which the hard disk drive is to be set. For IDE: { 0 | 1 }, for SCSI: { 0 .. 63 }. Defaults to 0.
+* **`[String]` Ensure** (_Write_): Specifies if the hard disk drive should exist or not. { *Present* | Absent }. Defaults to Present.
+
+Remarks:
+* When ControllerNumber or ControllerLocation is not provided, the same logic as Set-VMHardDiskDrive cmdlet is used.  
+
+### xVMScsiController
+* **`[String]` VMName** (_Key_): Specifies the name of the virtual machine whose SCSI controller is to be manipulated.
+* **`[Uint32]` ControllerNumber** (_Key_): Specifies the number of the controller to be set: { 0 | 1 | 2 | 3 }.
+* **`[String]` Ensure** (_Write_): Specifies if the SCSI controller should exist or not. { *Present* | Absent }. Defaults to Present.
+
+Remarks:
+* When there is only 1 SCSI controller and ControllerNumber 3 is passed during an Ensure=Present, all the intermediate controllers will also be created.
+* When Ensure=Absent, all the disks still connected to the controller will be detached.
+
 Please see the Examples section for more details. 
 
 ## Versions
@@ -137,8 +159,11 @@ Please see the Examples section for more details.
 ### Unreleased
 * Adding a new xVMHost resource for managing Hyper-V host settings.
 * Adds new MSFT_xVMProcessor to manage virtual machine processor options
+* Added the xVMHardDiskDrive resource, allowing manipulation of hard disks connected to a VM
+* Added the xVMScsiController resource, allowing manipulation of SCSI controllers connected to a VM
 
 ### 3.7.0.0
+
 * Adding a new resource
     * MSFT_xVMNetworkAdapter: Attaches a new VM network adapter to the management OS or VM.
 
